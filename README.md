@@ -23,7 +23,6 @@ the default .
   
 
 The manual fully explains the main constructs of LOccam .
-
 These are illustrated by many examples who where all tested on the ATMega2560  board .
     
     
