@@ -18,7 +18,7 @@ the default .
 
   ARM platforms : the files LOccam and FreeRTOS_ARM (Bill Greiman) . 
   In this later case you  must edit the file LOccam.h .
-  You comment  #include < FreeRTOS_AVR > and uncomment  #include<FreeRTOS_ARM> 
+  You comment  #include < FreeRTOS_AVR > and uncomment  #include < FreeRTOS_ARM >
   that's all .
   
 
