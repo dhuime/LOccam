@@ -22,8 +22,8 @@ the default .
   that's all .
   
 
-The manual fully explains the main constructs of LOccam . These are
-illustrated by many examples who where all tested on the ATMega2560  board .
+The manual fully explains the main constructs of LOccam .
+These are illustrated by many examples who where all tested on the ATMega2560  board .
     
     
 Content of different folders :
