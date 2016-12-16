@@ -1,5 +1,5 @@
 # LOccam
-LOccam a light implemantation of OCCAM langage for Arduino
+LOccam a light implemantation of OCCAM language for Arduino
 
 
 LOccam based upon OCCAM langage is  a wrapper , writen in C,  on the top of the 
