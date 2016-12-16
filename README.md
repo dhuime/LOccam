@@ -12,6 +12,7 @@ hobbyist world of Arduino.
   
 Installation of LOccam in  Arduino's IDE requires you  copy in the libraries 
 folder the following files :
+
   AVR platforms : the files LOccam and FreeRTOS_AVR ( Bill Greiman ) which is 
 the default .
 
