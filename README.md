@@ -11,15 +11,16 @@ LOccam is very simple to learn and implements very few constructs such : PAR,
 CHAN and  ALT   and is idealy suited for concurrent programming in the 
 hobbyist world of Arduino.
   
-Installation of LOccam in  Arduino's IDE requires you  copy  the following files 
-in the libraries folder :
+Installation of LOccam in  Arduino's IDE 
 
 First of all you must download Bill Greiman's version of FreeRTOS .
 
-  AVR platforms : the files LOccam and FreeRTOS_AVR ( Bill Greiman ) which is 
+Then copy the folowing folders in Arduino's libraries folder
+
+  AVR platforms : the folders LOccam and FreeRTOS_AVR ( Bill Greiman ) which is 
 the default .
 
-  ARM platforms : the files LOccam and FreeRTOS_ARM (Bill Greiman) . 
+  ARM platforms : the folders LOccam and FreeRTOS_ARM (Bill Greiman) . 
   In this later case you  must edit the file LOccam.h .
   You comment  #include < FreeRTOS_AVR > and  uncomment   #include < FreeRTOS_ARM >
   that's all .
