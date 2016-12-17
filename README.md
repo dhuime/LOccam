@@ -28,7 +28,7 @@ These are illustrated by many examples who where all tested on the ATMega2560  b
     
 Content of different folders :
 
-LOccam 
+LOccam   : to be included in Arduino's libraries
 
 examples : The examples
 
