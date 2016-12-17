@@ -30,8 +30,6 @@ Content of different folders :
 
 LOccam 
 
-greiman  : include  FreeRTOS_AVR and FreeRTOS_ARM of Bill Greiman
-
 examples : The examples
 
-manual   : LOccam manual
+html   : LOccam manual in html
