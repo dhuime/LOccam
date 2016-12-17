@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link href="style.css" media="screen" rel="stylesheet type="text/css"" />
+<title> LOccam</title>
+<meta charset="UTF-8"/>
+<script type="text/javascript"
+  src="MathJax/MathJax.js?config=AM_HTMLorMML-full">
+</script>
+</head>
+
+<body style="width:700px;">
+
+
+<h4 id="pol3"> Channels</h4>
+<p>
+OCCAM channels are the  only mean by which processes communicate.<br>
+Channels provides unbuffered unidirectionnal point to point communication between two concurrent processes.<br>
+Communication in channels  implements a "rendez vous". The first process ready (to read or write in the channel)
+is suspended. When the second one is ready  then data transfert occur
+ and the two processes continue executing their code.<br>
+LOccam fully implements OCCAM channels but the data type transfered is only the int type . <br><br>
+
+<b>Channel declaration</b><br><br>
+A channel has  data type CHAN  .
+</p>
+<pre id="code">
+
+ CHAN canal0, canal1  ; // declare two channels : canal0 and canal1
+ CHAN canaux[20]      ; // declare an array of 20 channels
+
+</pre>
+<p><b>
+Referencing channels</b><br><br>
+Referencing channels is the mean by which they are recognized by RTOS .<br>
+The function NEWCHAN  make it  possible .
+</p>
+<pre id="code">
+
+ prototype : void NEWCHAN(CHAN *)
+ 
+ Examples :
+ NEWCHAN(&canal0)  ;
+ for(i=0; i< 20 ; i++) NEWCHAN(&canaux[i]) ;
+
+</pre>
+
+<p>
+<b>Reading and writing channels</b><br><br>
+Reading and writing in channels is done by the functions readChan and writeChan.
+</p>
+<pre id="code">
+
+ prototype : int readChan(CHAN *)         // read a channel . return an int.
+ prototype : void writeChan(CHAN *, int)  // write an int into a channel
+
+</pre>
+<p>
+<b>A simple program</b><br><br>
+In this program the process proc0 write 100 in the channel mcanal . The process proc1 is reading
+mcanal. <br>
+For the ease of viewing the "rendez vous" protocol the function WAIT in proc0 forces
+proc1 to begin the first so it is suspending in the reading of mcanal.<br>
+</p>
+<pre id="code">
+
+  // canal.ino
+ 
+
+#include <LOccam.h>
+
+CHAN mcanal                           ;
+
+PROC  proc0(void *pvParameters){      // write mcanal
+    static CHAN *pchan                ;
+
+    pchan = (CHAN *)pvParameters      ;
+    WAIT(2)                           ; //  suspended 2 milli seconds 
+    Serial.println("\nP0 emet 100")   ;
+    writeCHAN(pchan, 100)             ; 
+    Serial.print("\nP0 : BY ...")     ;
+    EXIT()                            ;
+}
+
+PROC  proc1(void *pvParameters){      // read mcanal
+    static int recu                   ;
+    static CHAN *pchan                ;
+
+    pchan = (CHAN *)pvParameters      ;
+    Serial.print("P1 first : ")       ;
+    recu = readCHAN(pchan)            ;
+    
+    Serial.print("\nP1 a recu : ")    ;
+    Serial.print(recu)                ;
+    Serial.print("\nP1 : BY ...")     ;
+    EXIT()                            ;
+}
+
+
+void setup() {
+
+  Serial.begin(9600)        ;
+  Serial.flush()            ;
+  
+  NEWCHAN(&mcanal)          ;
+  
+  PAR(proc0, &mcanal)       ; // passing mcanal as parameter
+  PAR(proc1, &mcanal)       ;
+  START()                   ;
+}
+
+void loop() {}
+
+</pre>
+
+<p>
+<b>A simple ring of processes</b><br><br>
+Ring of processes  is frequent in concurrent programming .<br>
+In this example NBP processes are linked each other and forming a ring .<br>
+If i > 0 the process of rank i read the channel (i-1) and write the channel i.<br>
+If i = 0 the process of rank 0 write 0 in the channel 0 and read the channel NBP-1 .<br>
+When a process read a channel he increments the value before writing it. <br>
+So the process 0 read the value 19 in the channel (NBP-1) . 
+
+</p>
+<pre id="code">
+
+ // anneau.ino
+ // In this example the channels are not passed as parameters
+ // Only the index of a process is passed as parameter 
+
+#include <LOccam.h>
+
+#define NBP 20          // nbr of processes in the ring
+
+CHAN canal[NBP]         ;
+int procid[NBP]         ;
+
+
+PROC  process(void *pvParameters){
+    int *id  , pid , recu               ;
+
+    id = (int  *) pvParameters          ;
+    pid = *id                           ; // process identifier
+    
+    if(pid  > 0){
+        recu = readCHAN(((CHAN *)&canal[pid-1]))   ; // read c pid-1 
+        recu++                          ;
+        writeCHAN(((CHAN *)&canal[pid]),recu)      ; // write c pid
+    }
+    else{
+        writeCHAN(((CHAN *)&canal[0]), 0)          ; // write c 0  
+        recu = readCHAN(((CHAN *)&canal[NBP-1]))   ; // read  c NBP-1 
+        //
+        Serial.print("process 0 a recu : ");
+        Serial.println(recu)              ;
+    }
+    EXIT()                                ;
+}
+
+void setup() {
+  int i    ;
+  
+  Serial.begin(9600)       ;
+  
+  for(i=0;i< NBP; i++) {
+    NEWCHAN(&canal[i])     ;
+    procid[i] = i          ;
+  }
+ 
+  for(i=0;i< NBP; i++) PAR(process, procid+i); // index of process as parameter
+  Serial.println("START\n") ;
+  START()                   ;
+}
+
+void loop() {}
+
+</pre>
+<p>
+NB : In this example the array of channels is not passed as a parameter .<br>
+The expression of readChan and writeChan may appear cumbersome . This fact 
+shows a weakness of the Arduino compiler.<br><br>
+The reader is ancouraged to pass as parameters both indexes and channels . Do
+an ad-hoc structure.
+
+</p>
+
+</body>
+</html>
