@@ -3,9 +3,9 @@ LOccam a light implemantation of OCCAM language for Arduino
 
 
 LOccam based upon OCCAM language is  a wrapper , writen in C,  on the top of the 
-FreeRTOS whose adaptation for Arduino boards by Bill Greiman (https://github.com/greiman),
+FreeRTOS whose adaptation for Arduino boards by Bill Greiman :
+https://github.com/greiman/FreeRTOS-Arduino
  we choose for our project.
- 
 LOccam is very simple to learn and implements very few constructs such : PAR, 
 CHAN and  ALT   and is idealy suited for concurrent programming in the 
 hobbyist world of Arduino.
