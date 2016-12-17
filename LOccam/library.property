@@ -1,0 +1,9 @@
+name=LOccam
+version=1.0
+author=dhuime
+maintainer=dhuime
+sentence=
+paragraph=
+category=Uncategorized
+url=
+architectures=avr, arm
