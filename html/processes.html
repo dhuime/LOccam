@@ -15,10 +15,10 @@
 
 <h4 id="pol3"> Processes</h4>
 <p>
-A process execute his own  code ( in parallel with other processes ) and eventually terminate. Robotic processes most often never terminate 
-as they are running  an indefinite loop.<br>
-A process NEVER share directly information (data, code, etc .) with other processes but communicate
-with them with channels.<br><br>
+An OCCAM  process execute his  code ( in parallel with other processes ) and eventually terminate. <br>
+Robotic processes most often never terminate  as they are running  an indefinite loop.<br>
+Such a  process NEVER share directly information (data, code, etc .) with other processes but communicate
+with them by means of channels.<br><br>
 
 <b>LOccam syntax</b><br><br>
 LOccam programs are writen in C. There are few spécific constructs such PAR, CHAN, ALT , etc... ,
@@ -47,11 +47,11 @@ The identifier "pvParameters" is <b>MANDATORY</b> and recognized by RTOS .
 
 <b>Structure of a LOccam program</b><br><br>
 A program is divided in three parts.<br><br>
-first part  : devoted to #include and #define declarations.<br>
-second part : devoted to CHAN , ALT, PROC , structures for passing parameters declarations .<br>
-Arduino setup() :  Here are included :<br>
+<b>first part</b>  : devoted to #include and #define declarations.<br><br>
+<b>second part</b> : devoted to CHAN , ALT, PROC  declarations .<br><br>
+<b>third part</b> : Arduino setup() :  Here are included :<br>
 __Specific declarations  relating to Arduino's libraries . (such as Serial.begin()).<br>
-__Initialise  RTOS's  declarations such :  PAR, NEWCHAN, NEWALT , structures.<br>
+__Initialise  RTOS's  declarations such :  PAR, NEWCHAN, NEWALT .<br>
 __ Execute the START function.<br>
 
 
