@@ -13,18 +13,19 @@
 <h4 id="pol3"> Alternation processes</h4>
 <p>
 Alternation processes provide a powerfull tool for managing the control of multiple channels as
-inputs . If more than one input is ready the alternation choose one in hazard .Then a process
+inputs . If more than one input is ready the alternation choose one in hazard .Then a process P
 associated with that input  is executed  and the alternation process terminate . For that reason
 most often alternation processes  execute a loop .
 If no input is ready the alternation process is suspended.<br><br>
 
-In robotics inputs are associated with sensors and the process executed write a code  in a  channel 
-for motors or actuators . 
+In robotics inputs are associated with sensors and the process P, which is executed when  an input is choosen, 
+most often  write a code  in a  channel  in the direction of motors or actuators . <br>
 So we see that alternation processes are the tool of choice for  implemanting  Control units .
 </p>
 <pre id="code">
 
- In LOccam an alternation is a process who's managing a ALT structure .<br>
+ In LOccam an alternation is a process who's managing a ALT structure by  mean 
+ of the function readAlt.
  LOccam alternations are equivalent ( with minor restrictions) to OCCAM alternations .
 
 </pre>
@@ -91,7 +92,7 @@ The  writeAlt function performs the writing in an alternation channel .
 To each channel in a ALT structure is associated a guard whose value is TRUE or FALSE .<br>
 The default is TRUE . These guards are managed by the alternation process . ( see later) .<br><br>
 An input to an alternation process is READY if :<br>
-The corresponding channel has been writen and the associated guard is TRUE .<br>
+The corresponding channel has been writen and the associated guard is TRUE .<br><br>
 The readAlt function tests if an input is ready .<br>
 If it is true a channel is choosen in hazard an read . <br>
 Instructions managing the value readen are executed.
