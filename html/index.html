@@ -18,15 +18,16 @@
 LOccam based upon OCCAM langage is  a wrapper , writen in C on the top of the RTOS 
  <a href= "http://www.freertos.org"> FreeRTOS </a> whose adaptation for Arduino boards has been made
   in particular by <a href= "https://github.com/greiman/FreeRTOS-Arduino">Bill Greiman</a>  which 
-  one we choose for our project.<br><br>
-  LOccam is very simple to learn and implements very few constructs such : PAR, CHAN, ALT , etc ..
-  and is idealy suited for concurrent programming in the hobbyist world of Arduino.<br>
+  one we choose for our project.<br><br> 
+  LOccam  permits a clear structuration of the programs .Furthermore it is very simple to learn and <br>
+  implements very few constructs such : PAR, CHAN, ALT , etc .. for that reason 
+  it is idealy suited for concurrent programming in the hobbyist world of Arduino. <br>
   For those who are curious of Occam we encourage them to read :
   <a href= "http://www.wotug.org/occam/documentation/oc21refman.pdf">Occam 2 Reference Manual </a>.<br><br>
   
   Installation of LOccam in the Arduino IDE requires you  copy in the libraries folder of your Arduino
-  the following files :<br><br>
-  AVR platforms : the files LOccam and FreeRTOS_AVR ( Bill Greiman ) which is the default .<br>
+  IDE the following files :<br><br>
+  AVR platforms : the files LOccam and FreeRTOS_AVR ( Bill Greiman ) which is the default .<br><br>
   ARM platforms : the files LOccam and FreeRTOS_ARM (Bill Greiman) .<br> 
   In this later case you  must edit the file LOccam.h .<br>
    You comment  #include < FreeRTOS_AVR > and uncomment  #include < FreeRTOS_ARM >.<br><br>
@@ -40,7 +41,7 @@ Chapitre 1 : <a href="parallel.html"> Parallel processes </a>
 <br><br>
 Chapitre 2 : <a href="channels.html"> Channels </a>
 <br><br>
-Chapitre 3 : <a href="alternatives.html">Alternative processes </a>
+Chapitre 3 : <a href="alternatives.html">Alternation processes </a>
 <br><br>
 Chapitre 4 : <a href="interupts.html">Interrupts </a>
 <br><br><br>
