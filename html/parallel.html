@@ -15,8 +15,7 @@
 
 <h4 id="pol3"> Parallel processes</h4>
 <p>
-The parallel construct PAR combines a number of processes which perform actions  concurrently.<br>
-The PAR permits that processes previously déclared PROC may be actualy recognised by RTOS.
+The PAR function permits that processes previously déclared PROC may be actualy recognised by RTOS.
 </p>
 <pre id="code">
 
@@ -35,9 +34,9 @@ Furthermore all processes declared PAR have equal priorities.
 
 <p>
 <b>Parameters passing</b><br><br>
-Parameters passing permit processes to share information through channels, alternative ,
-and structures ( mainly based upon the formers ).<br>
-Suppose a structure st of type ST has been previously declared .
+Parameters passing permit processes to share information through CHAN channels or structure <br>
+(such ALT) relating to channels als channels are the only mean by wich process communicate.<br>
+Suppose a structure st of type ST has been previously declared .<br>
 A typical process who share this structure may be  writen :
 </p>
 <pre id="code">
@@ -61,7 +60,7 @@ appeared in a PAR construct.
 </p>
 <pre id="code">
 
- proc0 and proc1 are previously been declared
+ proc0 and proc1 have previously been declared
  
  PAR(proc0,NULL)  ;
  PAR(proc1,NULL)  ;
