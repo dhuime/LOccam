@@ -1,0 +1,124 @@
+<head>
+<link href="style.css" media="screen" rel="stylesheet type="text/css"" />
+<title> LOccam</title>
+<meta charset="UTF-8"/>
+<script type="text/javascript"
+  src="MathJax/MathJax.js?config=AM_HTMLorMML-full">
+</script>
+</head>
+
+<body style="width:700px;">
+
+
+<h4 id="pol3"> Alternation processes (PRI_ALT)</h4>
+
+<b> The PRI_ALT structure</b><br><br>
+<p>
+The PRI_ALT structure is the same as the ALT one except that if an alternation 
+process manage such a  structure then the ready inputs are investigated in the order
+ they appear in the switch instruction. <br>
+ The index 0 is studied first .<br>
+ If the input on channel 0 is ready she is choosen if not the input  on channel 1 is investigated etc ..<br><br>
+ 
+ Beside these channels are two special one who are associated with inputs always ready if their corresponding 
+ guards are set TRUE . <br>
+These channels are <b>cTIMER</b> and  <b>cSKIP</b> and are specific of 
+PRI_ALT alternation processes<br><br>
+ <b>cTIMER</b>  if his guard is TRUE  is treated as though it where a ready 
+input and permit immediate access to the timer value  .<br>
+ <b>cSKIP</b>   if his guard is TRUE is treated as though it where a ready input and may be read immediately.  <br><br>
+ 
+ 
+ The function writePALT(PRI_ALT *, MSG ) is similar to writeALT(ALT *,MSG) with the same meaning .<br>
+ The function readPALT(PRI_ALT *)  is similar to  readALT(ALT *) with the same meaning .<br><br>
+ 
+ The following example illustrate  using   cSKIP channels  with alternation process based on PRI_ALT.<br>
+ Examples involving PRI_ALT alternation and timer processes will be given in the chapter relative to TIMER.<br><br>
+ 
+ 
+ <b> Managing asynchronism</b><br><br>
+ As we know communication with channels implies that the processes who communicate are both ready .<br>
+ In many situations it may be interesting not to be suspended in the reading of a channel.<br>
+ The following program who use a PRI_ALT alternation with a cSKIP channel as input give a (partial) solution to<br>
+ this problem. In fact the process who write the channel remain blocked  while it is not read!!<br><br>
+ First the cSKIP channel's guard is set to TRUE and the channel become enabled.<br>
+ Remember that if the other inputs  are not ready the cSKIP channel is read immediately.<br>
+ If nothing is writen by the keyboard process the myproc process may go on without being blocked.<br><br>
+<b> NOte</b> : A input relating to a cSKIP (resp cTIMER) channel must be writen as the <b>LAST ONE</b> in the
+ switch construct. ( Remember the  strategy of choice of ready inputs for PRI_ALT ) .
+</p>
+
+<pre id="code">
+
+// cSKIP channel
+
+#include < LOccam.h >
+
+PRI_ALT     paltrn     ;
+
+PROC  keyboard(void *pvParameters){ // write channel  0
+    static MSG msg              ;
+    static int dispo            ; 
+    static PRI_ALT *alt         ;
+    unsigned lu                 ;
+
+    alt = (PRI_ALT *)pvParameters   ;
+    msg.canal = 0               ;
+    while(1){
+      dispo = Serial.available() ;
+      if(dispo != 0){
+        lu = Serial.read()       ;
+        msg.data = (int)lu       ;
+        writePALT(alt, msg)      ;
+      }
+    }
+}
+
+
+PROC myproc(void *pvParameters){       // alternation process based on PRI_ALT
+  static PRI_ALT *palt                ;
+  static MSG msg                      ;
+
+  static u_long now1 , now2, delta    ;
+  static byte carlu , encore          ;
+
+  palt =(PRI_ALT *)pvParameters       ;
+  
+  setPTRUE(palt,cSKIP)                ; // enable the cSKIP channel
+  encore = TRUE                       ;
+  do{
+      WAIT(2000)                      ;
+      msg = readPALT(palt)            ;
+      switch(msg.canal){
+        case 0:{
+            carlu = (byte) msg.data   ;
+            Serial.print("You have a message . Print it ");
+            Serial.println(carlu)     ;
+            break                     ;
+        }
+        case cSKIP :{                   // cSKIP channel 
+            Serial.println("Nothing arrived to day");
+            Serial.println("Y AM WORKING");
+            break                     ;
+        }
+        default: break                ;
+      }
+  }   while(encore)                   ;
+}
+
+void setup() {
+  Serial.begin(9600)        ;
+
+  NEWPRI_ALT(&paltrn,1)     ; 
+
+  PAR(myproc, &paltrn)      ;
+  PAR(keyboard, &paltrn)    ;
+  START()                   ;
+}
+
+void loop() {}
+
+</pre>
+
+</body>
+</html>
