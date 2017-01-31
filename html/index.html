@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link href="style.css" media="screen" rel="stylesheet type="text/css"" />
+<title> LOccam</title>
+<meta charset="UTF-8"/>
+<script type="text/javascript"
+  src="MathJax/MathJax.js?config=AM_HTMLorMML-full">
+</script>
+</head>
+
+<body style="width:700px;">
+
+
+<h4 id="pol3">LOccam Version 1.0</h4>
+<p>
+LOccam based upon OCCAM langage is  a wrapper , writen in C on the top of the RTOS 
+ <a href= "http://www.freertos.org"> FreeRTOS </a> whose adaptation for Arduino boards has been made
+  in particular by <a href= "https://github.com/greiman/FreeRTOS-Arduino">Bill Greiman</a>  which 
+  one we choose for our project.<br><br> 
+  LOccam  permits a clear structuration of concurrent programs . This is not the case for low level<br>
+  constructs such semaphore , mutex etc .. , difficult to handle, given by Real Time OS .<br>
+  Furthermore LOccam is simple to learn and  implements very few constructs such : PAR, CHAN, ALT , TIMER  etc .. <br>
+  For that reason  LOccam is idealy suited for concurrent programming in the hobbyist world of Arduino. <br><br>
+  Whose who are curious of Occam we encourage them to read :
+  <a href= "http://www.wotug.org/occam/documentation/oc21refman.pdf">Occam 2 Reference Manual </a>.<br><br>
+  <b>Installation</b><br><br>
+  Installation of LOccam in the Arduino IDE requires you  copy in the libraries folder of your Arduino
+  IDE the following files :<br><br>
+  AVR platforms : the files LOccam and FreeRTOS_AVR ( Bill Greiman ) which is the default .<br><br>
+  ARM platforms : the files LOccam and FreeRTOS_ARM (Bill Greiman) .<br> 
+  In this later case you  must edit the file LOccam.h .<br>
+   You comment  #include < FreeRTOS_AVR > and uncomment  #include < FreeRTOS_ARM >.<br><br>
+  LOccam comes with many examples who where all tested on the ATMega2560 board.<br><br>
+   
+<b>Manual content  </b><br><br>
+
+Chapitre 0 :<a href="processes.html"> Processes </a>
+<br><br>
+Chapitre 1 : <a href="parallel.html"> Parallel processes </a>
+<br><br>
+Chapitre 2 : <a href="channels.html"> Channels </a>
+<br><br>
+Chapitre 3 : <a href="alternatives.html">Alternation processes (ALT)</a>
+<br><br>
+Chapitre 4 : <a href="prialt.html">Alternation processes (PRI_ALT)</a>
+<br><br>
+Chapitre 5 : <a href="guardes.html">Guards </a>
+<br><br>
+Chapitre 6 : <a href="timer.html">Timer </a>
+<br><br>
+Chapitre 7 : <a href="interupts.html">Interrupts </a>
+<br><br>
+
+</p>
+
+
+<b><br>Warning</b><br>
+<p>
+New constructs such  PRI_ALT and TIMER  may be found in this new version of LOccam  but who is entirely <br>
+ compatible with the previous one . <br>
+ Minor changes in the syntax of alternation processes . readAlt and writeAlt are replaced by readALT( resp writeALT)<br>
+Furthermore the implementation of ALT is rebuild  for a full compatibility with guards.<br>
+</p>
+</body>
+</html>
