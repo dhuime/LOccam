@@ -1,0 +1,168 @@
+<head>
+<link href="style.css" media="screen" rel="stylesheet type="text/css"" />
+<title> LOccam</title>
+<meta charset="UTF-8"/>
+<script type="text/javascript"
+  src="MathJax/MathJax.js?config=AM_HTMLorMML-full">
+</script>
+</head>
+
+<body style="width:700px;">
+
+
+<h4 id="pol3"> Guards </h4>
+
+
+<p>
+<b>Managing guards</b><br><br>
+As we have seen input to alternation processes  are ready if , in particular , guards are ready . <br>
+Management of guards is done by an alternation processes who execute the functions<br>
+setTRUE and setFALSE .<br>
+By default all guards are set TRUE .<br>
+If the alternation process is relative to a PRI_ALT structure the corresponding functions are <br>
+setPTRUE and setPFALSE with the same meaning.<br>
+</p>
+
+<pre id="code">
+
+ void setTRUE (Alt *, unsigned) . setTRUE(&altrn, 0) ; // set guard 0 of altrn TRUE
+ void setFALSE(ALT *, unsigned) . setFALSE(&altrn,1) ; // set guard 1 of altrn FALSE
+
+</pre>
+<p>
+<b>A simple program showing the action of guards</b><br><br>
+In this program the alternation process Control own 3 input and write as outputs 2 channels : can0 and can1.<br>
+The inputs 0,1,2 :<br>
+channel 0 and channel1 connects Control to the process sender0 and sender1 .<br>
+sender0 (resp sender1) write NBR times the channel 0 (resp channel1).<br>
+channel2 is writen by the process kbd.<br><br>
+If Control receive on input channel 0 (resp 1) the value is printed .<br>
+In the beginning input 0 is disabled .<br>
+When process kbd write in channel 2 the input 0 is enabled.<br>
+The reader is encouraged to change the value of the WAIT()  in the kbd process 
+<br> and see the result.
+</p>
+
+<pre id="code">
+
+#include < LOccam.h >
+#define NBRM 10                 //  nbre of messages emited by each  process
+
+ALT altrn                      ;
+
+
+PROC  kbd(void *pvParameters){ // ecrit canal 2
+    static MSG msg              ;
+    static char cardispo        ; 
+    static ALT *alt             ;
+
+    alt = (ALT *)pvParameters   ;
+    msg.canal = 2               ;
+    msg.data  = -1              ; // no sens data
+    WAIT(5)                     ;
+    
+    writeALT(alt, msg)          ;
+    EXIT()                      ;
+}
+
+
+
+PROC Control (void *pvParameters ) {
+    static MSG msg                ;
+    static int count, NBRMC       ;
+    ALT *alt                      ;
+
+    alt = (ALT *)pvParameters     ;
+    NBRMC = 2* NBRM               ; 
+    count = 0                     ;
+    setFALSE(alt,0)               ; // disable channel 0
+    while(count <  NBRMC){
+        //WAIT(500)               ; 
+        msg = readALT(alt)        ;
+        switch(msg.canal){
+          case 0:{
+            Serial.print("canal 0 :")   ;
+            Serial.println(msg.data)    ;
+              count++                   ;
+              break ;
+          }
+          case 1:{
+              Serial.print("canal 1 :") ;
+              Serial.println(msg.data)  ;
+              count++                   ;
+              break ;
+          }
+          case 2:{ // writen by kbd
+              setTRUE(alt,0)      ; // enable channel 0
+              break               ;
+          }
+          default: break          ;
+        }
+    }
+    WAIT(100)                     ; // for klean printing at the end
+    Serial.println("\nControl BY ....")     ;
+    EXIT()                                  ;
+} // Control
+
+
+PROC Sender0 (void *pvParameters ){
+    static MSG data0              ;
+    static int i                  ;
+    static ALT *alt               ;
+
+    alt = (ALT *)pvParameters     ;
+    i = 0 ;
+    data0.data = 10               ;
+    data0.canal = 0               ;
+    while(i< NBRM){
+      writeALT(alt, data0)        ;
+      i++                         ;
+    }
+    WAIT(100);
+    Serial.println("\nS0 BY ...") ;
+    EXIT()                        ;
+}
+
+
+PROC Sender1 (void *pvParameters ){
+    static MSG data1              ;
+    static int i                  ;
+    static ALT *alt               ;
+    
+    alt = (ALT *)pvParameters     ;
+    i = 0                         ;
+    data1.data = 20               ;
+    data1.canal = 1               ;
+    while(i< NBRM){
+      writeALT(alt, data1)        ;
+      i++                         ;
+    }
+    WAIT(100);
+    Serial.println("\nS1 BY ...") ;
+    EXIT()                        ;
+}
+
+void setup() {
+  
+    Serial.begin(9600)  ;
+    Serial.flush()      ;
+
+    ////////////////////////////////////
+    
+    NEWALT(&altrn,3)       ;
+  
+    PAR(Sender0 ,&altrn)   ;
+    PAR(Sender1 ,&altrn)   ;
+    PAR(kbd,&altrn)        ;
+    
+    PAR(Control,&altrn)    ;
+    START()                ;
+}
+
+void loop() {}
+
+</pre>
+
+
+</body>
+</html>
