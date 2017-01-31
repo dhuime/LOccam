@@ -26,7 +26,7 @@ manual   : LOccam manual in html
 Manual  content :
 
 Chapter 0 : Processes
-Chapter 1 : Parallele processes
+Chapter 1 : Parallel processes
 Chapter 2 : Channels
 Chapter 3 : Alternation processes (ALT)
 Chapter 4 : Alternation processes (PRI_ALT)
