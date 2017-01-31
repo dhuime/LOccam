@@ -1,0 +1,276 @@
+<head>
+<link href="style.css" media="screen" rel="stylesheet type="text/css"" />
+<title> LOccam</title>
+<meta charset="UTF-8"/>
+<script type="text/javascript"
+  src="MathJax/MathJax.js?config=AM_HTMLorMML-full">
+</script>
+</head>
+
+<body style="width:700px;">
+
+
+<h4 id="pol3"> Alternation processes (ALT)</h4>
+<p>
+Alternation processes provide a powerfull tool for managing the control of multiple channels as
+inputs . If more than one input is ready the alternation choose one (see Note) .Then a process P
+associated with that input  is executed  and the alternation process terminate . For that reason
+most often alternation processes  execute a loop .
+If no input is ready the alternation process is suspended.<br><br>
+
+In robotics inputs are associated with sensors and the process P, which is executed when  an input is choosen, 
+most often  write a code  in a  channel  in the direction of motors or actuators . <br>
+So we see that alternation processes are the tool of choice for  implemanting  Control units .<br><br>
+</p>
+<pre id="code">
+
+ In LOccam an alternation is a process who's managing a ALT (resp PRI_ALT) structure 
+ by  mean of the function readALT (resp readPALT) .
+ LOccam alternations are equivalent ( with minor restrictions) to OCCAM alternations .
+
+</pre>
+
+<p>
+
+<b>Note</b><br>
+In the actual ALT's implementation  in LOccam the first process who becomes  ready is choosen .<br>
+In PRI_ALT (see later) the strategy of choosing ready's processes is different.<br><br>
+
+
+<b>The ALT structure and his inputs</b><br><br>
+The ALT structure accepts as inputs a finite number of channels. These channels are not to be declared 
+because they are enrolled in the structure and they are referenced by their index 0, 1 , .. depending 
+of the number of inputs.<br>
+ The constant MAX_ALT_CHAN in LOccam.h  give the  maximum number of these channels .<br>
+ By default is value is 10 .<br>
+ 
+
+<b>NB</b> : In Occam the inputs of an alternation are channels of type CHAN and 
+are declared apart of it .<br><br>
+
+<b>The ALT structure declaration </b>:
+
+</p>
+<pre id="code">
+
+ ALT alt_identifier	; 
+
+ Example : ALT altrn  ; // declare altrn as an ALT structure
+
+</pre> 
+
+<p>
+<b>Referencing ALT structures</b><br><br>
+The function NEWALT performs the referencing of ALT structures.<br>
+NEWALT accepts two parameters : The first is a pointer to a ALT structure and the second give the
+number of channel inputs.
+</p>
+<pre id="code">
+
+ prototype : void NEWALT(ALT *, int) 
+ Example   : NEWALT(&altrn, 2)	;  // referencing altrn with 2 input channels 0 and 1
+
+</pre>
+<p>
+<b>Writing an alternation channel</b><br><br>
+
+Due to the specific characteristics of alternation's channels ( but who behave like channels of type CHAN)
+given a ALT structure we must set the index of the channel beside the int value transmitted by this channel.<br>
+For that purpose the MSG structure is devoted for writing in alternation channels.<br>
+The  writeALT  function performs the writing in an alternation channel of type ALT .
+</p>
+<pre id="code">
+
+ The MSG structure  own two fields : data and  canal both of type int .
+ canal : index of the channel in which we write
+ data  : the value to be writen
+
+ declaration : MSG msg_identifier ;
+ Example     : MSG msg            ; 
+
+ The function writeALT
+
+ prototype : void writeALT(ALT *, MSG)
+ Example :
+
+ msg.data = 56 ; msg.canal = 1   ;
+ writeALT(&altrn, msg)           ;  // write the value 56 in the channel 1 of altrn
+
+</pre>
+<p>
+<b>The readALT function</b><br><br>
+To each channel in a ALT structure is associated a guard whose value is TRUE or FALSE .<br>
+The default is TRUE . These guards are managed by the alternation process . ( see Chapter Guards) .<br><br>
+An input to an alternation process is READY if :<br>
+The corresponding channel has been writen and the associated guard is TRUE .<br><br>
+The readALT function tests if an input is ready .<br>
+If it is true the corresponding (see Note) channel is choosen an read . <br>
+A process  managing the value readen is then executed .<br>
+<b>Note</b> : C instructions are true processes in LOccam .<br>
+The termination of this process  defines the termination of the alternation process.<br>
+NB : When the choosen channel is read the process who  write it is activated.<br><br>
+If no input is ready the alternation process is suspended .<br><br>
+</p>
+<pre id="code">
+
+prototype : MSG readALT(ALT *)
+Example   : msg = readALT(&altrn) ;
+
+</pre>
+<p>
+In practice  using readALT is performed using the following general  sheme
+</p>
+
+
+<pre id="code">
+
+PROC process (void *pvParameters ) { // alternation process with k+1 inputs
+  static MSG msg                ;    // manage a ALT structure 
+  static ALT *palt              ;
+  //   other static local variables declarations
+
+  palt = (ALT *)pvParameters    ; // palt = pointer to the ALT structure passed 
+                                  // as parameter
+  do{
+        msg = readALT(palt)     ; // suspended if no input ready
+        switch(msg.canal){
+              case 0:{            // first input on channel 0
+                  .....           // do something if ready 
+                  break         ;
+              }
+              ......
+              
+              case k:{            // last input on channel k
+                  .....           // do something if ready
+                  break         ;
+              }
+              default:  break   ;
+        }
+  } while(condition)             ; // often that condition is TRUE (infinite loop)
+
+</pre>
+
+<p>
+<b>A multiplexer </b><br><br>
+In this example  processes sender0 and sender1 are writing datas via channels 0 
+and 1 in direction of  the alternation process Control<br>
+When receiving datas Control send them to the process "receive" via the 
+channel  canal .<br>
+At his turn "receive" print the data who appear interleaved on the screen .
+</p>
+
+<pre id="code">
+
+//  alt.ino
+//  implement a multiplexer
+
+#include <LOccam.h>
+
+ALT altrn               ;
+CHAN canal              ;
+
+PROC receive(void *pvParameters ) {
+  CHAN *canal                   ;
+  int i , data                  ;
+  
+  canal = (CHAN *) pvParameters ;
+  i=0                           ;
+  do{
+    data = readCHAN(canal)      ;
+    i++                         ;
+    Serial.print(data)          ;
+    Serial.print(" ")           ;
+  } while(i < 20)               ;
+  EXIT()                        ;
+}   
+  
+  
+
+PROC Control (void *pvParameters ) { // alternation process
+  static MSG msg                ;
+  static unsigned compteur      ;
+  static ALT *palt              ;
+
+  palt = (ALT *)pvParameters    ; 
+  compteur = 0                  ;
+  do{
+        msg = readALT(palt)     ; // suspended if no channel ready
+        switch(msg.canal){
+              case 0:{            // Executed if channel 0 is ready
+                  writeCHAN(((CHAN *)&canal),msg.data); 
+                  compteur++    ;
+                  break         ;
+              }
+              case 1:{            // Executed if channel 1 is ready
+                  writeCHAN(((CHAN*)&canal),msg.data) ;
+                  compteur++    ;
+                  break         ;
+              }
+              default:  break   ;
+        }
+  } while(compteur < 20)         ;
+  Serial.println("\nControl BY ...")  ;
+  EXIT()                        ;
+}
+
+
+PROC Sender0 (void *pvParameters ){
+    static MSG msg              ;
+    static ALT *palt            ;
+    static int count            ;
+
+    palt = (ALT *)pvParameters  ; // palt = pointer on altrn
+    msg.data = 0                ;
+    msg.canal = 0               ;
+    count = 0                  ;
+    
+    while(count < 10){
+      writeALT(palt, msg)         ;
+      count++                     ;
+    }
+    Serial.print("\nSender0 BY ...");
+    EXIT()                      ;
+}
+
+
+PROC Sender1 (void *pvParameters ){
+    static MSG msg              ;
+    static ALT *palt            ;
+    static int count            ;
+
+    palt = (ALT *)pvParameters  ; // palt = pointer on altrn
+    count = 0                   ;
+    msg.data = 1                ;
+    msg.canal = 1               ;
+    
+    while(count < 10){
+    writeALT(palt, msg)         ;
+    count++                     ;
+    }
+    Serial.print("\nSender1 BY ...");
+    EXIT()                      ;
+}
+
+
+void setup( ){
+  
+    Serial.begin(9600)  ;
+    Serial.flush()      ;
+
+    NEWALT(&altrn,2)    ;
+    NEWCHAN(&canal)     ;
+
+    PAR(receive, &canal); // receive data from sender0 and sender1
+    PAR(Sender0,&altrn) ; 
+    PAR(Sender1,&altrn) ; 
+    
+    PAR(Control,&altrn) ; // implement the multiplexer
+    START()             ;
+}
+
+void loop(){}
+
+</pre>
+
+</body>
+</html>
