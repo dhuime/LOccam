@@ -21,7 +21,10 @@ process manage such a  structure then the ready inputs are investigated in the o
  If the input on channel 0 is ready she is choosen if not the input  on channel 1 is investigated etc ..<br><br>
  
  Beside these channels are two special one who are associated with inputs always ready if their corresponding 
- guards are set TRUE . <br>
+  guards are set TRUE.<br>
+  Unlike the other channels the guards of these special channels are  set <b>FALSE</b> by default. <br>
+<b>NOTE</b> : If not they would preempt the choice of other channel taken into acount the strategy of choice.<br>
+  
 These channels are <b>cTIMER</b> and  <b>cSKIP</b> and are specific of 
 PRI_ALT alternation processes<br><br>
  <b>cTIMER</b>  if his guard is TRUE  is treated as though it where a ready 
