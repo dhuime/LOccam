@@ -107,7 +107,7 @@ void setup() {
   
   PAR(proc0, &mcanal)       ; // passing mcanal as parameter
   PAR(proc1, &mcanal)       ;
-  START()                   ;
+  START(NULL)               ;
 }
 
 void loop() {}
@@ -245,7 +245,7 @@ void setup() {
 
   PAR(init, NULL)           ;
   for(i=1 ;i<5;i++) PAR(process, procid+i)   ;
-  START()                   ;
+  START(NULL)                   ;
 }
 
 void loop() {}
