@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link href="style.css" media="screen" rel="stylesheet type="text/css"" />
+<title> LOccam</title>
+<meta charset="UTF-8"/>
+<script type="text/javascript"
+  src="MathJax/MathJax.js?config=AM_HTMLorMML-full">
+</script>
+</head>
+
+<body style="width:700px;">
+
+
+<h4 id="pol3"> Parallel processes</h4>
+<p>
+The PAR function permits that processes previously declared PROC may be actualy recognised by RTOS
+and may running concurently.
+</p>
+<pre id="code">
+
+ prototype : PAR( proc_id,void *pointer)
+ 
+ proc_id : process identifier
+ pointer : pointer to a parameter of any type  . 
+ If there are no parameters is value is NULL .
+
+</pre>
+<p>
+<b>NB</b> : There are as many PAR than processes declared PROC (see later) .<br>
+Furthermore all processes declared PAR have equal priorities.
+
+</p>
+
+<p>
+<b>Parameters passing</b><br><br>
+Parameters passing permit processes to share information through CHAN channels or structure <br>
+(such ALT) relating to channels als channels are the only mean by wich process communicate.<br>
+Suppose a structure st of type ST has been previously declared .<br>
+A typical process who share this structure may be  writen :
+</p>
+<pre id="code">
+
+PROC process(void *pvParameters){
+  static pstr *ST            ;	
+  // local variables declarations
+		
+  pstr = (ST *)pvParameters  ; // now pstr points to st
+  // process instructions
+  // .....
+  EXIT()                     ; // if process must terminate
+}
+</pre>
+
+<p>
+<b>Replicated parallel</b><br><br>
+Frequently processes share the same code . If they are numerous it may be cumbersome
+to declare them one by one . The replicated form of PAR permits to declare the
+processes text  only one time.<br>
+The local variables to processes involved in a replicated par should <b>not to be declared static</b> . 
+In fact each process own its local variables in a dedicated place  on  the stack  .<br>
+The example "par2.ino"  below is a simple example of replicated PAR . An other example "tokenring.ino"
+is given in the chapter relative to channels.
+</p>
+
+
+<p>
+<b>The START function</b><br><br>
+The START function , recognised by RTOS, allows the parallel execution of all processes who 
+appeared in a PAR construct.<br>
+</p>
+
+<pre id="code">
+
+prototype : void START(void *ptr)
+
+exemple : START(NULL)	// if the TIMER is not used . See TIMER chapter
+
+</pre>
+
+<pre id="code">
+
+ proc0 and proc1 have previously been declared.
+ 
+ PAR(proc0,NULL)  ;
+ PAR(proc1,NULL)  ;
+ START(NULL)      ; 
+ 
+ After execution of START proc0 and proc1 are running concurrently
+
+</pre>
+
+<p>
+<b>A simple example</b><br><br>
+In this example proc0 and proc1 execute concurrently printing interleaving  0 and 1 .<br> This interleaving 
+as been made possible  due to the WAIT (milliseconds) function  . <br>
+The reader is encouraged to remove the WAIT(s). What append ?
+</p>
+<pre id="code">
+
+#include < LOccam.h >
+
+
+char *str1 = "Hello world ..." ;
+
+PROC  proc0(void *pvParameters){
+    static int i         ;
+    
+    for(i=0;i<20;i++){ 
+      Serial.print("0")  ;
+      WAIT(2)            ; // suspended 2 millis seconds
+    }            
+    Serial.print("\P0 BY ....\n") ;
+    EXIT()               ;
+}
+
+PROC  proc1(void *pvParameters){
+    static int i         ;
+    static char *pstr    ;
+
+    pstr = (char *)pvParameters ;
+    Serial.println(pstr)        ; // prints "Hello world ..."
+
+    for(i=0;i<10;i++){ 
+      Serial.print("1")  ;
+      WAIT(2)            ; // suspended 2 millis seconds
+    }
+    Serial.print("\nP1 BY ...\n")  ;
+    EXIT()                ;
+}
+
+void setup() {
+
+  Serial.begin(9600)      ;
+  Serial.flush()          ;
+      
+  PAR(proc0,NULL)         ; // no parameter
+  PAR(proc1,str1)         ; // passing str1 as parameter
+  START(NULL)                 ; 
+}
+
+void loop() {}
+  
+</pre>
+
+<p>
+<b>A simple example of Replicated PAR</b><br><br>
+Two processes are making two leds blinking.<br>
+They share the same code but not the local variables .
+</p>
+<br>
+
+<img src="images/par2.png" height="400"  width="500">
+
+<pre id="code">
+// blink2.ino
+
+#include < LOccam.h >
+
+const int redled = 3    ;
+const int greenled = 2  ;
+
+int procid[2] ;
+
+
+PROC  process(void *pvParameters){
+     int i, *id, pid, led   ;
+  
+   id = (int *)pvParameters       ;
+   pid = *id                      ;
+
+    if(!pid) led = redled        ;
+    else led = greenled          ;
+
+      for(i=0;i<5;i++){ 
+        digitalWrite(led,LOW)     ;
+        WAIT(1000)                ;
+        digitalWrite(led,HIGH)    ;
+        WAIT(1000)                ;
+      }  
+    
+    Serial.print( pid);  
+    Serial.print("  BY ....\n")   ;
+    EXIT()                        ;
+} 
+
+void setup() { 
+  int i         ;
+
+  Serial.begin(9600)        ;
+  pinMode(redled,OUTPUT)    ;
+  pinMode(greenled,OUTPUT)  ;
+  
+  for(i=0;i<2;i++) procid[i]=i            ;
+
+  // Replicated parallel
+  for(i=0;i<2;i++) PAR(process,procid+i)  ;
+  START(NULL)   ;
+}
+</pre>
+
+void loop(){}
+</body>
+</html>
