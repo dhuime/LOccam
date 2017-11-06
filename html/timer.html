@@ -1,0 +1,320 @@
+<head>
+<link href="style.css" media="screen" rel="stylesheet type="text/css"" />
+<title> LOccam</title>
+<meta charset="UTF-8"/>
+<script type="text/javascript"
+  src="MathJax/MathJax.js?config=AM_HTMLorMML-full">
+</script>
+</head>
+
+<body style="width:700px;">
+
+
+<h4 id="pol3"> Timer</h4>
+<p>
+Timers produce a value which represent time. This value is expressed in number of ticks .<br>
+A tick is defined in milliseconds when the timer is declared .<br>
+The timer values range from  0  to 2^(32)-1  and are expressed by the u_long (unsigned long) type.<br>
+When these values reach the maximum 2^(32)-1 they return to 0.
+</p>
+<pre id="code">
+
+In LOccam a timer is defined by  the <b>process</b>  runTIMER who manage a 
+ structure of type TIMER . 
+
+</pre>
+
+<p>
+<b>The TIMER declaration</b><br><br>
+</p>
+
+<pre id="code">
+
+TIMER mytimer	;  // declare   the structure mytimer of type TIMER
+<br>
+</pre>
+
+<p>
+<b>The  NEWTIMER function</b><br><br>
+The NEWTIMER function  initialize the structure of type TIMER  in term of ticks  and make it recognized by Rtos.
+</p>
+
+<pre id="code">
+
+prototype : void NEWTIMER(TIMER *, unsigned) ;
+The second parameter  give the value of one tick expressed in milli seconds.
+
+Example 
+TIMER mytimer;
+
+NEWTIMER(&mytimer,10) ; //  The tick's value is 10 milliseconds.
+
+</pre>
+
+<p>
+<b>The  runTIMER process</b><br><br>
+The runTIMER process  who's argument is a pointer to a structure TIMER appear in a PAR construct<br>
+who's effect is to make it ready to run.
+</p>
+
+<pre id="code">
+
+prototype : PROC runTIMER(TIMER *)
+
+Example : given the value of mytimer defined above 
+
+PAR(runTIMER,&mytimer ) ; // runTIMER ready to run in parallel
+
+When runTIMER is running then the ticks counter is incremented every 10 milli seconds
+
+</pre>
+
+
+<p>
+<b>The  readTIMER function</b><br><br>
+The  readTIMER function give the value of the timer .
+</p>
+
+<pre id="code">
+
+prototype : u_long readTIMER(TIMER *)
+
+Example :
+u_long now ; 
+
+now = readTIMER(&mytimer)	;
+
+</pre>
+
+<p>
+<b>The waitTIMER function </b><br><br>
+The  waitTIMER function suspend  the calling process a number of ticks .
+</p>
+
+<pre id="code">
+
+prototype : void waitTIMER(TIMER *, u_long )
+
+Example :
+// the ticks value of mytimer is 10 milli seconds
+
+waitTIMER(&mytimer, 200L) ; // suspend 2 seconds the calling process
+</pre>
+
+<br><br>
+
+<p>
+<b>The ALTIME structure </b><br><br>
+
+We have seen that only ONE parameter may be passed to a process through
+the "pvParameters" given by RTOS . If more than one parameters need to be passed
+a specific structure must be created whose fields define the different parameters.
+For the specific usage of both a PRI_ALT and a TIMER  by a process   the ALTIME 
+structure whose fields are _prialt and _timer is given.
+</p>
+
+<pre id="code">
+
+typedef struct s{
+  PRI_ALT *_prialt;
+  TIMER   *_timer ;
+} ALTIME          ;
+
+declaration:  ALTIME  identifier ;
+example :     ALTIME paltime     ;
+
+Initialisation :
+paltime._prialt = &paltrn  ; // paltrn of type PRI_ALT previously declared
+paltime._timer  = &timer   ; // timer of type TIMER previously declared
+</pre>
+
+
+<p>
+<b>A simple example </b><br><br>
+In this example the timer's ticks is 10 milli seconds.<br>
+Twenty stars are printed . A star is printed every second.
+</p>
+
+
+<pre id="code">
+
+//  timer0 
+
+#include < LOccam.h >
+
+
+TIMER timer ;
+
+PROC process(void *pvParameters) {
+  static TIMER *tmr          ;
+  static u_long tim1, tim2   ;
+
+  tmr = (TIMER *)pvParameters;
+  Serial.println("\nprocess START ");
+
+  tim1 = readTIMER(tmr)      ;
+  do{
+    waitTIMER(tmr,100L)      ; // suspend 1 second
+    tim2 = readTIMER(tmr)    ;
+    Serial.print(" *")       ;
+  } while((tim2 -tim1) < 2000L ); // boucle 20 secondes
+  
+  Serial.println("\nprocess BY ...");
+  EXIT()                     ;
+}
+
+
+void setup() { 
+  
+  Serial.begin(9600)        ;
+
+  NEWTIMER(&timer, 10)      ; // timer ticks every 10 millis 
+
+  PAR(runTIMER, &timer)     ; //  timer ready to run 
+  PAR(process, &timer)      ; //  process is using the timer
+  START(NULL)                   ;
+}
+
+void loop() {}
+
+</pre>
+
+<p>
+<b>The SUB function</b><br><br>
+Due to the cyclic nature of the timer who's next value past 2^(32)-1 is 0 the SUB<br>
+function give the number of ticks between two values of the timer.
+</p>
+
+<pre id="code">
+
+prototype : u_long SUB(u_long,u_long)
+
+Example:
+// given u_long now1,now2,delta ;
+// MAXTIME = 2^(32)-1
+
+delta = SUB(now2,now1) ;
+
+if(now2 > now1) then delta = now2-now1
+else if(now2 < now1) delta =(MAXTIME - now1) + now2 
+
+</pre>
+
+<p>
+<b>Watchdog </b><br><br>
+In a program the watchdog is active if a time interval goes beyond a prescribed 
+delay .
+In the  example below if a character is not entered in less than 2 
+seconds the program abord.<br>
+In this program we use a PRI_AL alternation with two inputs .<br>
+The first input (the 0 one) comes from the keyboard and is written when a 
+character is read .<br>
+The second input (index cTIMER devoted to the timer ) who is immediately ready 
+to be read if the other inputs are not . <br><br>
+<b>NOTE:</b><br>
+The watchdog process needs two parameters one of type PRI_ALT , the other of type TIMER
+so a ALTIME structure is given to solve this problem.
+</p>
+
+<pre id="code">
+
+
+//  watchdog
+
+
+#include < LOccam.h >
+
+#define MAXTIME 0xFFFFFFFF
+
+
+TIMER  timer           ;
+PRI_ALT     paltrn     ;
+ALT_TIME paltime       ;
+
+
+PROC  keyboard(void *pvParameters){ // write channel  0
+    static MSG msg               ;
+    static int dispo             ; 
+    static PRI_ALT *alt          ;
+    unsigned lu                  ;
+
+    alt = (PRI_ALT *)pvParameters ;
+    msg.canal = 0                ;
+    while(1){
+      dispo = Serial.available() ;
+      if(dispo != 0){
+        lu = Serial.read()       ;
+        msg.data = (int)lu       ;
+        writePALT(alt, msg)      ;
+      }
+    }
+}
+
+
+PROC watchdog(void *pvParameters){
+  static ALTIME *paltime      ;
+  static PRI_ALT *palt        ;
+  static TIMER *timer         ;
+  static MSG msg              ;
+
+  static u_long now1 , now2, delta    ;
+  static byte carlu , encore          ;
+
+  paltime =(ALTIME *)pvParameters     ;
+  
+  palt = paltime->_prialt             ;
+  timer = paltime->_timer             ;
+  
+  now1 = readTIMER(&timer)            ;
+  encore = TRUE                       ;
+  do{
+      WAIT(2000)                      ;
+      msg = readPALT(palt)            ;
+      switch(msg.canal){
+        case 0:{
+            carlu = (byte) msg.data   ;
+            Serial.println(carlu)     ; 
+            now1 = readTIMER(&timer)  ;
+            break                     ;
+        }
+        case cTIMER:{
+            now2 =  readTIMER(&timer) ;
+            delta = SUB(now2 ,now1)   ;
+            if(delta > 20L) encore = FALSE  ; // waiting  max  20 ticks
+            break                     ;
+        }
+        default: break                ;
+      }
+      Serial.println("Y AM WORKING");
+  }   while(encore)                   ;
+  Serial.println("TIME OUT ....")     ;
+  EXIT()                              ;
+  
+}
+
+void setup() {
+  Serial.begin(9600)        ;
+
+  NEWPRI_ALT(&paltrn,2)     ;
+  NEWTIMER(&timer, 10)      ; // ticks every 10 milli seconds
+  paltime._prialt = &paltrn ;
+  paltime._timer = étimer	 ;
+  
+  PAR(runTIMER, &timer)     ; // timer ready to run
+  PAR(watchdog, &paltime)   ; // permet a watchdog de reconnaitre paltrn
+                              // ET timer
+  PAR(keyboard, &paltrn)    ;
+  START(&paltrn)            ; // permet au timer de reconnaitre paltrn
+}
+
+void loop() {
+
+}
+
+</pre>
+
+
+
+
+</body>
+</html>
