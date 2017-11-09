@@ -43,7 +43,8 @@ input and permit immediate access to the timer value  .<br>
  As we know communication with channels implies that the processes who communicate are both ready .<br>
  In many situations it may be interesting not to be suspended in the reading of a channel.<br>
  The following program who use a PRI_ALT alternation with a cSKIP channel as input give a (partial) solution to<br>
- this problem. In fact the process who write the channel remain blocked  while it is not read!!<br><br>
+ this problem. <br><br>
+  
  First the cSKIP channel's guard is set to TRUE and the channel become enabled.<br>
  Remember that if the other inputs  are not ready the cSKIP channel is read immediately.<br>
  If nothing is writen by the keyboard process the myproc process may go on without being blocked.<br><br>
