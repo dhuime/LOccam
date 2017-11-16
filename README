@@ -18,10 +18,10 @@ These are illustrated by many examples who where all tested on the ATMega2560  b
     
 Content of different folders :
 
-LOccam   : Functions, structures and macros defining LOccam 
-examples : The examples
-manual   : LOccam manual in html
-
+LOccam       : Functions, structures and macros defining LOccam 
+examples    : The examples
+manual      : LOccam manual in html
+LittleRobot : A demonstrator .Its function is to show the use of LOccam in robotics. 
 
 Manual  content :
 
