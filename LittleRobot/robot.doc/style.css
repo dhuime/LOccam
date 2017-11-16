@@ -1,0 +1,19 @@
+
+body {font-family:arial,verdana,sans-serif;margin-left:100px;width:900px;}
+p {font-size: 14px;}
+section{font-size:14px;}
+#code{font-size:13px;background-color:#E6E6D8;}
+footer{height:80px; font-size:12px;background-color:#E6E6D8; border:solid; border-width:1px;}
+@font-face{
+		font-family:prince;
+		src: url(polices/PRINC.TTF)	;
+	}
+
+#pol3{color:#666699;font-family:prince,arial,sans-serif;font-size:15px;font-weight:500;}	
+#pol4{color:#666699;font-family:prince,arial,sans-serif;font-size:20px;font-weight:700;}
+#pol5{color:#666699;font-family:prince,arial,sans-serif;font-size:20px;font-weight:800;}
+
+a{text-decoration:none; color:#47476B;}
+a:hover{color: green}
+
+#fot{padding-bottom:12px; margin-bottom:12px;margin-left:20px;}

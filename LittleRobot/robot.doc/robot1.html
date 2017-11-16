@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link href="style.css" media="screen" rel="stylesheet type="text/css"" />
+<title> LOccam</title>
+<meta charset="UTF-8"/>
+<script type="text/javascript"
+  src="MathJax/MathJax.js?config=AM_HTMLorMML-full">
+</script>
+</head>
+
+<body style="width:700px;">
+
+
+<h3 id="pol3">Robot demonstrator</h3>
+<p>
+This little robot is a demonstrator.<br>
+Its function is to show the use of LOccam in robotics. <br><br>
+
+<b>Hardware :</b><br><br>
+
+An Arduino Mega2560.<br>
+A Shadow chassis from SparkFun:<br>
+2 DC motors and their Ardumoto controller board from SparkFun.<br>
+// <br>
+A SRF05 ultra-sound telemetry<br>
+A light sensor TSL2561 from SparkFun.<br><br>
+
+
+ <img src="robot.jpg" alt="" height="220" width="350"> 
+ <br><br>
+ <b>The software</b><br><br>
+ 
+ Written in LOccam the software is structured in 4 processes connected by channels.<br><br>
+ 
+<b>The processes</b><br><br>
+
+Two processes <b>srf05</b> and <b>tsl2560</b> manage the sound and light sensors.<br> 
+The alternative <b>control </b>process receives information from srf05 and tsl2561. <br>
+It processes them, then passes the result of the treatment to motors. <br>
+The process <b>motors</b> acts on the wheels of the robot. <br><br>
+
+<b>The channels</b><br><br>
+
+Channel 0, related to the alternative process control, links the srf05 process to the latter. <br>
+Channel 1, linked to the alternative control process,  links the tsl2560 process to the latter. <br>
+The chanMotors channel links the process control to the motors process.<br><br>
+
+<b>Actions performed by the processes</b> <br><br>
+
+The processes srf05 and tsl2561  only transmit to the control the information from the sensors.<br>
+The  process motors only  executes the commands issued by the control.<br>
+The control analyzes the data sent by the sensors.<br>
+ If the light is too weak it sends the engines the order to stop. <br>
+ If the distance from the robot to an obstacle is too short, it orders <br>
+ the motors  to turn around. 
+
+</p>
+
+
+</body>
+</html>
