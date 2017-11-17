@@ -5,7 +5,8 @@
 	This library provides functions to access the TAOS TSL2561
 	Illumination Sensor.
 
-	Rewriten in C for the need of compatibility with  LOccam .
+	Rewriten in C for the need of compatibility with  LOccam 
+	by Gilbert Dhuime .
 
 */
 
