@@ -4,13 +4,14 @@
 /*  robot5.ino
  *
  * 
- * A simple robot with two motors an a ultra sound sensor
- * 
- * The motors are driven by Ardumoto sparkfun shield
+ * A simple robot with two motors , a ultra sound
+ * and a light  sensors.
+ * The motors are driven by Ardumoto SparkFun shield
  * 
  *  The ultrasonic detector is SRF05.   
- *  3 pins of the latter are used: 5V, GND, TRIGGER (7) 
+ *  3 pins of the latter are used: 5V, GND, TRIGGER (pin 7) 
  *
+ * The light sensor is a TSL2560 from SparkFun .
  * 
  * Coding of messages issued by the controller for the control of motors
  * 
@@ -160,9 +161,9 @@ PROC srf05(void *pvParameters){
     duration = pulseIn(TRIGGER, HIGH);     // Reads echo pulse in from SRF05 in micro seconds
   
     distance = duration/58      ;  // distance in cm
-    msg.data = distance		;
+    msg.data = distance		      ;
     writeALT(palt,msg)	      	;
-    WAIT(100)			;
+    WAIT(100)			              ;
   
  } // while()
 } // srf05
