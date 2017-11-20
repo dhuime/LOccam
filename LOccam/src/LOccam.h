@@ -238,7 +238,7 @@ MSG _altread(ALT *alt){
 
 
 void NEWALT(ALT *alt, unsigned nProc){
-  unsigned i	, nbrProc		                    ;
+  unsigned i                	                    ;
   
   alt->nbrProc = nProc                              ;
   for(i=0;i< nProc;i++) alt->guard[i] = TRUE	    ; 
