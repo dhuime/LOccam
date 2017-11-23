@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link href="style.css" media="screen" rel="stylesheet type="text/css"" />
+<title> LOccam</title>
+<meta charset="UTF-8"/>
+<script type="text/javascript"
+  src="MathJax/MathJax.js?config=AM_HTMLorMML-full">
+</script>
+</head>
+
+<body style="width:700px;">
+
+
+<h4 id="pol3"> Channels</h4>
+<p>
+OCCAM channels are the  only mean by which processes communicate.<br>
+Channels provides unbuffered unidirectionnal point to point communication between two concurrent processes.<br>
+Communication in channels  implements a "rendez vous". The first process ready (to read or write in the channel)
+is suspended. When the second one is ready  then data transfert occur
+ and the two processes continue executing their code.<br>
+LOccam fully implements OCCAM channels but the data type transfered is only the int type . <br><br>
+
+<b>Channel declaration</b><br><br>
+A channel has  data type CHAN  .
+</p>
+<pre id="code">
+
+ CHAN canal0, canal1  ; // declare two channels : canal0 and canal1
+ CHAN canaux[20]      ; // declare an array of 20 channels
+
+</pre>
+<p><b>
+Referencing channels</b><br><br>
+Referencing channels is the mean by which they are recognized by RTOS .<br>
+The function NEWCHAN  make it  possible .
+</p>
+<pre id="code">
+
+ prototype : void NEWCHAN(CHAN *)
+ 
+ Examples :
+ NEWCHAN(&canal0)  ;
+ for(i=0; i< 20 ; i++) NEWCHAN(&canaux[i]) ;
+
+</pre>
+
+<p>
+<b>Reading and writing channels</b><br><br>
+Reading and writing in channels is done by the functions readCHAN and writeCHAN.
+</p>
+<pre id="code">
+
+ prototype : int readCHAN(CHAN *)         // read a channel . return an int.
+ prototype : void writeCHAN(CHAN *, int)  // write an int into a channel
+
+</pre>
+<p>
+<b>A simple program</b><br><br>
+In this program the process proc0 write 100 in the channel mcanal . The process proc1 is reading
+mcanal. <br>
+For the ease of viewing the "rendez vous" protocol the function WAIT in proc0 forces
+proc1 to begin the first so it is suspending in the reading of mcanal.<br>
+</p>
+<pre id="code">
+
+  // canal.ino
+ 
+
+#include < LOccam.h >
+
+CHAN mcanal                           ;
+
+PROC  proc0(void *pvParameters){      // write mcanal
+    static CHAN *pchan                ;
+
+    pchan = (CHAN *)pvParameters      ;
+    WAIT(2)                           ; //  suspended 2 milli seconds 
+    Serial.println("\nP0 emet 100")   ;
+    writeCHAN(pchan, 100)             ; 
+    Serial.print("\nP0 : BY ...")     ;
+    EXIT()                            ;
+}
+
+PROC  proc1(void *pvParameters){      // read mcanal
+    static int recu                   ;
+    static CHAN *pchan                ;
+
+    pchan = (CHAN *)pvParameters      ;
+    Serial.print("P1 first : ")       ;
+    recu = readCHAN(pchan)            ;
+    
+    Serial.print("\nP1 a recu : ")    ;
+    Serial.print(recu)                ;
+    Serial.print("\nP1 : BY ...")     ;
+    EXIT()                            ;
+}
+
+
+void setup() {
+
+  Serial.begin(9600)        ;
+  Serial.flush()            ;
+  
+  NEWCHAN(&mcanal)          ;
+  
+  PAR(proc0, &mcanal)       ; // passing mcanal as parameter
+  PAR(proc1, &mcanal)       ;
+  START(NULL)                   ;
+}
+
+void loop() {}
+
+</pre>
+
+<p>
+<b>A simple token ring</b><br><br>
+In this example a ring of 5 processes behave as a (simplified) token ring.<br>
+This type of interconnection of processes is the most simple one.<br>
+In the ring a token is running passing from one process to its successor.<br> 
+There are two runs .<br>
+Initially the token's value is 0.<br>
+The token is incremented by the process who receive it .<br>
+<b>First run</b><br>
+process 0 send 0 to process 1 via the channel 0<br>
+process 1 send 1 to process 2 via the channel 1<br>
+.....<br>
+process 4 send 4 to process 0 via the channel 4<br>
+<b>Second run</b><br>
+process 0 send 5 to process 1 via the channel 0<br>
+.....<br>
+process 4 send 9 to process 0 via the channel 4<br>
+</p>
+<pre id="code">
+ 
+// tokenring2.ino
+
+#include < LOccam.h >
+
+
+typedef struct sp{
+	CHAN 	*pred   ; // passing parameters structure
+	CHAN 	*succ   ;
+	int 	procId  ;
+} PARAM         ;
+
+
+CHAN 	canal[5]	;
+PARAM	param[5]	;
+
+
+PROC init(void *pvParameters){ // cas particulier du process 0
+  int jeton ,pid,sender       ;
+  PARAM *param                ;
+  CHAN *precede, *succede     ;
+  
+  param = (PARAM *)pvParameters ;
+  precede = param->pred       ;
+  succede = param->succ       ;
+
+  pid = param->procId         ;
+  sender = (pid+4) %5         ;
+  
+  jeton = 0                   ;  
+  writeCHAN(succede, jeton)   ;
+  jeton = readCHAN(precede)   ;
+  
+  jeton++                     ;
+  writeCHAN(succede, jeton)   ;
+  jeton = readCHAN(precede)   ;
+  Serial.print("process : ")      ;
+  Serial.print(pid)               ;
+  Serial.print(" a recu : ")      ;
+  Serial.print(jeton)             ;
+  Serial.print(" de : ")          ;
+  Serial.println(sender)          ;
+  //
+  Serial.println("BY ...")        ;
+  
+  EXIT()                          ;
+}
+
+
+
+PROC  process(void *pvParameters){
+  int  pid , sender                     ;
+  int jeton , tour                      ;
+  
+  PARAM *param                        	;
+  CHAN *precede, *succede             	;
+  
+  param = (PARAM *)pvParameters       	;
+  pid = param->procId                 	;
+  precede = param->pred               	;
+  succede = param->succ               	;
+  sender = (pid + 4) %5               	;
+  tour = 0                             ;
+  do{
+        jeton = readCHAN(precede)      ; 
+        Serial.print("process : ")     ;
+        Serial.print(pid)              ;
+        Serial.print(" a recu : ")     ;
+        Serial.print(jeton)            ;
+        Serial.print(" de : ")         ;
+        Serial.println(sender)         ;
+        jeton++                        ;
+        tour++                         ;
+        writeCHAN(succede, jeton)      ;
+  } while(tour <2);
+   EXIT()                              ;
+} // process
+
+
+
+void setup() {
+  int i                             ;
+  
+  Serial.begin(9600)                ;
+  
+  for(i=0;i<5;i++)NEWCHAN(&canal[i]);
+  
+  // Initialize parameters
+  // Each process needs 3 parameters : 2 channels , an identifier
+  
+ for(i=0; i<5; i++){
+    param[i].succ = &canal[i]       ; // channel successor of process i
+    param[i].pred = &canal[(i+4)%5] ; // channel preceding process i
+    param[i].procId = i             ; // identifier i of process i
+ }
+
+  PAR(init, & param[0])              ;
+  for(i=1; i<5; i++ )
+      PAR(process, & param[i])       ; // The 5 processes are sharing the same code
+  
+  START(NULL)                       ;
+}
+
+void loop() {}
+
+</pre>
+<p>
+
+
+</p>
+
+</body>
+</html>
